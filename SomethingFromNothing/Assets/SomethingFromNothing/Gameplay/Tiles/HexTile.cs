@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using SomethingFromNothing;
 using UnityEngine;
 
 // HexTiles are the core game piece. They have 4 states (empty, grown, burned, and default) and
@@ -7,10 +8,13 @@ using UnityEngine;
 public class HexTile : MonoBehaviour
 {
     // TODO: Reference to 6 adjacent tiles. Null is allowed
+    HexTile[] adjacentTiles;
 
     // TODO: Reference to 3 adjacent nodes. Null is NOT allowed
+    VertexNode[] adjacentNodes;
 
     // TODO: Enumerate state
+    EVertexType[] vertexPermutation;
 
     float secondsLeft;
 
@@ -53,4 +57,9 @@ public class HexTile : MonoBehaviour
     {
 
     }
+
+    public EVertexType GetVertex(int index) {
+        return vertexPermutation[index];
+    }
+
 }
