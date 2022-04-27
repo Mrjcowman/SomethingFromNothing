@@ -126,12 +126,12 @@ public class HexGrid : MonoBehaviour
     public HexTile?[] getAdjacentTilesToTile(Vector2Int cellPos)
     {
         HexTile?[] adjacent = new HexTile?[6];
-        adjacent[0] = getTile(cellPos + Vector2Int.up);
-        adjacent[1] = getTile(cellPos + Vector2Int.right);
-        adjacent[2] = getTile(cellPos + Vector2Int.down + Vector2Int.right);
-        adjacent[3] = getTile(cellPos + Vector2Int.down);
-        adjacent[4] = getTile(cellPos + Vector2Int.left);
-        adjacent[5] = getTile(cellPos + Vector2Int.up + Vector2Int.left);
+        adjacent[0] = getTile(getAdjacentCell(cellPos, EHexDirection.One));
+        adjacent[1] = getTile(getAdjacentCell(cellPos, EHexDirection.Three));
+        adjacent[2] = getTile(getAdjacentCell(cellPos, EHexDirection.Five));
+        adjacent[3] = getTile(getAdjacentCell(cellPos, EHexDirection.Seven));
+        adjacent[4] = getTile(getAdjacentCell(cellPos, EHexDirection.Nine));
+        adjacent[5] = getTile(getAdjacentCell(cellPos, EHexDirection.Eleven));
 
         return adjacent;
     }
@@ -145,6 +145,17 @@ public class HexGrid : MonoBehaviour
         adjacent[2] = getTile(getAdjacentCell(vertPos, EHexDirection.One));
 
         return adjacent;
+    }
+
+    public void PopulateAdjacentTiles(Vector2Int cellPos)
+    {
+        HexTile?[] adjacent = getAdjacentTilesToTile(cellPos);
+        for(int i = 0; i<6; i++)
+        {
+            if (adjacent[i] is null) {
+                CreateEmptyTile(getAdjacentCell(cellPos, (EHexDirection)i));
+            }
+        }
     }
 
     HexTile? getTile(Vector2Int cellPos)

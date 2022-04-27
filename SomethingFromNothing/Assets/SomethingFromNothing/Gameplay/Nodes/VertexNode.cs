@@ -84,6 +84,12 @@ public class VertexNode : MonoBehaviour
         Debug.Log("Grown!");
         isGrown = true;
         spriteRenderer.enabled = true;
+
+        foreach (HexTile? tile in adjacentTiles)
+        {
+            if (tile is not null)
+                tile.Grow();
+        }
     }
 
     // When an adjacent tile burns, so does this node.

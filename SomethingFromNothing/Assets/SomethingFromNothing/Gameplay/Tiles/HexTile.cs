@@ -92,6 +92,19 @@ public class HexTile : MonoBehaviour
     public void setAdjacentTiles(HexTile?[] _adjacentTiles)
     {
         adjacentTiles = _adjacentTiles;
+        for (int i = 0; i < _adjacentTiles.Length; i++)
+        {
+            if (adjacentTiles[i] is not null)
+            {
+                // (i+3)%6 rotates the index 180 degrees
+                adjacentTiles[i].setAdjacentTile((i+3)%6, this);
+            }
+        }
+    }
+
+    public void setAdjacentTile(int index, HexTile tile)
+    {
+        adjacentTiles[index] = tile;
     }
 
     // Each second the tile is alive, add to the score for each adjacent tree
@@ -137,6 +150,7 @@ public class HexTile : MonoBehaviour
         tileState = ETileState.Grown;
         spriteRenderer.sprite = spriteGrown;
         //TODO: create empty spaces
+        grid.PopulateAdjacentTiles(cellPosition);
     }
 
     // When the time is up, destroy adjacent trees and any spaces that might 
@@ -162,8 +176,28 @@ public class HexTile : MonoBehaviour
 
     public void Damage()
     {
-        secondsLeft --;
-        SFNGame.AddScore(-1);
+        Debug.Log(string.Format("Damaged! Position {0}, {1}", cellPosition.x, cellPosition.y));
+        if(tileState == ETileState.Empty)
+        {
+            bool stillValid = false;
+            foreach (HexTile? tile in adjacentTiles)
+            {
+                if (tile is not null) {
+                    if (tile.IsGrown()){
+                        stillValid = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!stillValid) {
+                Destroy(gameObject);
+            }
+
+        } else if (timerActive) {
+            secondsLeft --;
+            SFNGame.AddScore(-1);
+        }
     }
 
     public EVertexType GetVertex(int index) {
