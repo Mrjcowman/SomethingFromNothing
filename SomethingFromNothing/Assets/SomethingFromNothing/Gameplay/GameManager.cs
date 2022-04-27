@@ -2,13 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using TMPro;
+
 public class GameManager : MonoBehaviour
 {
-    int score;
+    int score = 0;
     int upcomingVertexPermutationIndex;
 
     public HexGrid grid;
     public CanvasRenderer upcomingTileDisplay;
+
+    public TextMeshProUGUI scoreText;
 
     public void AddScore(int points)
     {
@@ -45,6 +49,6 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        scoreText.text = string.Format("Score: {0}", score);
     }
 }
