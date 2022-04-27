@@ -18,7 +18,18 @@ namespace SomethingFromNothing
             new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
             new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun}
         };
-    }
 
+        static int score;
+
+        public static void AddScore(int points)
+        {
+            score += points;
+        }
+
+        public static void ResetScore()
+        {
+            score = 0;
+        }
+    }
     
 }
