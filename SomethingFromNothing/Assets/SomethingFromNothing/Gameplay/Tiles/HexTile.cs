@@ -8,16 +8,17 @@ using UnityEngine;
 // carry the heavy-lifting for scoring and game state management.
 public class HexTile : MonoBehaviour
 {
+    // Tunable variables
+    const float MAX_SECONDS_LEFT = 5;
 
-    const float MAX_SECONDS_LEFT = 10;
+    HexGrid grid;
 
-    // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
-    HexTile[] adjacentTiles;
+    #nullable enable
+    HexTile?[] adjacentTiles = new HexTile?[6];     // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
+    #nullable disable
+    VertexNode[] adjacentNodes;                     // Reference to 3 adjacent nodes clockwise from 12:00 position. Null is NOT allowed
+    Vector2Int cellPosition;
 
-    // Reference to 3 adjacent nodes clockwise from 12:00 position. Null is NOT allowed
-    VertexNode[] adjacentNodes;
-
-    // TODO: Enumerate state
     enum ETileState {
         Empty,
         Grown,
@@ -42,28 +43,67 @@ public class HexTile : MonoBehaviour
     SpriteRenderer spriteRenderer;
 
     float secondsLeft;
+    bool timerActive;
+
 
     void Start()
     {
         secondsLeft = -1;
+        timerActive = false;
         tileState = ETileState.Empty;
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = spriteEmpty;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (timerActive) {
+            int previousWholeSecond = (int) secondsLeft;
+            secondsLeft -= Time.deltaTime;
+
+            // If the truncated time changes, a whole second has ticked by
+            if (previousWholeSecond != (int) secondsLeft) {
+                OnTimerTick();
+            }
+
+            // TODO: render timer
+        }
+    }
+
+    public void setGrid(HexGrid _grid)
+    {
+        grid = _grid;
+    }
+
+    public void setCellPosition(Vector2Int _cellPosition)
+    {
+        cellPosition = _cellPosition;
+    }
+
+    public void setAdjacentNodes(VertexNode[] _adjacentNodes)
+    {
+        adjacentNodes = _adjacentNodes;
+    }
+
+    public void setAdjacentTiles(HexTile?[] _adjacentTiles)
+    {
+        adjacentTiles = _adjacentTiles;
     }
 
     // Each second the tile is alive, add to the score for each adjacent tree
-    // and update the UI timer display
     void OnTimerTick()
     {
+        if (secondsLeft <= 0) {
+            secondsLeft = -1;
+            timerActive = false;
+            Burn();
+            return;
+        }
+
         if (adjacentNodes[0].IsGrown()) SFNGame.AddScore(1);
         if (adjacentNodes[1].IsGrown()) SFNGame.AddScore(1);
         if (adjacentNodes[2].IsGrown()) SFNGame.AddScore(1);
+
     }
 
     // On placement, expand the node system and notify adjacent pieces of its existence.
@@ -73,7 +113,7 @@ public class HexTile : MonoBehaviour
         tileState = ETileState.Default;
         spriteRenderer.sprite = spriteDefault;
         secondsLeft = MAX_SECONDS_LEFT;
-        //TODO: update sprite and start timer
+        timerActive = true;
     }
 
     // If a tree grows on an adjacent node, this tile becomes grown and adjacent
@@ -83,7 +123,7 @@ public class HexTile : MonoBehaviour
     {
         tileState = ETileState.Grown;
         spriteRenderer.sprite = spriteGrown;
-        //TODO: update sprite and create empty spaces
+        //TODO: create empty spaces
     }
 
     // When the time is up, destroy adjacent trees and any spaces that might 
