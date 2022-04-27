@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SomethingFromNothing;
 using UnityEngine;
+using TMPro;
 
 
 // HexTiles are the core game piece. They have 4 states (empty, grown, burned, and default) and
@@ -41,6 +42,8 @@ public class HexTile : MonoBehaviour
 
     public Sprite spriteEmpty, spriteGrown, spriteBurned, spriteDefault;
     SpriteRenderer spriteRenderer;
+    SpriteRenderer vertexRenderer;
+    TextMeshProUGUI timerText;
 
     float secondsLeft;
     bool timerActive;
@@ -53,6 +56,12 @@ public class HexTile : MonoBehaviour
         tileState = ETileState.Empty;
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = spriteEmpty;
+
+        vertexRenderer = gameObject.transform.Find("TileNodes").GetComponent<SpriteRenderer>();
+        vertexRenderer.enabled = false;
+
+        timerText = gameObject.GetComponentInChildren<TextMeshProUGUI>();
+        timerText.text = "";
     }
 
     void Update()
@@ -66,8 +75,16 @@ public class HexTile : MonoBehaviour
                 OnTimerTick();
             }
 
-            // TODO: render timer
+            if (secondsLeft <= 0) {
+                secondsLeft = -1;
+                timerActive = false;
+                Burn();
+                return;
+            }
+
+            timerText.text = ((int) (secondsLeft + 1)).ToString();
         }
+        else timerText.text = "";
     }
 
     public void setGrid(HexGrid _grid)
@@ -112,13 +129,6 @@ public class HexTile : MonoBehaviour
     // Each second the tile is alive, add to the score for each adjacent tree
     void OnTimerTick()
     {
-        if (secondsLeft <= 0) {
-            secondsLeft = -1;
-            timerActive = false;
-            Burn();
-            return;
-        }
-
         if (adjacentNodes[0].IsGrown()) SFNGame.AddScore(1);
         if (adjacentNodes[1].IsGrown()) SFNGame.AddScore(1);
         if (adjacentNodes[2].IsGrown()) SFNGame.AddScore(1);
@@ -142,6 +152,8 @@ public class HexTile : MonoBehaviour
             node.AddTile();
         }
 
+        vertexRenderer.enabled = true;
+
     }
 
     // If a tree grows on an adjacent node, this tile becomes grown and adjacent
@@ -162,6 +174,7 @@ public class HexTile : MonoBehaviour
         spriteRenderer.sprite = spriteBurned;
 
         vertexPermutation = null;
+        vertexRenderer.enabled = false;
         
         foreach (HexTile? tile in adjacentTiles)
         {
