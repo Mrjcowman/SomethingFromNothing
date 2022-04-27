@@ -13,6 +13,7 @@ public class HexTile : MonoBehaviour
     const float MAX_SECONDS_LEFT = 10;
 
     HexGrid grid;
+    GameManager gameManager;
 
     #nullable enable
     HexTile?[] adjacentTiles = new HexTile?[6];     // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
@@ -33,10 +34,10 @@ public class HexTile : MonoBehaviour
     {
         new EVertexType[] {EVertexType.Sun, EVertexType.Nutrients, EVertexType.Water},
         new EVertexType[] {EVertexType.Sun, EVertexType.Water, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
         new EVertexType[] {EVertexType.Nutrients, EVertexType.Water, EVertexType.Sun},
         new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun},
-        new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
-        new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
     };
     int? vertexPermutationIndex;
 
@@ -47,6 +48,8 @@ public class HexTile : MonoBehaviour
 
     float secondsLeft;
     bool timerActive;
+
+    bool isStartTile = false;
 
 
     void Start()
@@ -62,6 +65,8 @@ public class HexTile : MonoBehaviour
 
         timerText = gameObject.GetComponentInChildren<TextMeshProUGUI>();
         timerText.text = "";
+
+        if(isStartTile) Place(0);
     }
 
     void Update()
@@ -129,9 +134,9 @@ public class HexTile : MonoBehaviour
     // Each second the tile is alive, add to the score for each adjacent tree
     void OnTimerTick()
     {
-        if (adjacentNodes[0].IsGrown()) SFNGame.AddScore(1);
-        if (adjacentNodes[1].IsGrown()) SFNGame.AddScore(1);
-        if (adjacentNodes[2].IsGrown()) SFNGame.AddScore(1);
+        if (adjacentNodes[0].IsGrown()) gameManager.AddScore(1);
+        if (adjacentNodes[1].IsGrown()) gameManager.AddScore(1);
+        if (adjacentNodes[2].IsGrown()) gameManager.AddScore(1);
 
     }
 
@@ -146,15 +151,21 @@ public class HexTile : MonoBehaviour
 
         vertexPermutationIndex = _vertexPermutationIndex;
 
+        Debug.Log(string.Format("Permutation: {0}", vertexPermutationIndex));
+
         foreach (VertexNode node in adjacentNodes)
         {
             node.AddTile();
         }
 
         // Rotate/mirror the vertices based on permutation
-        float angle = 120f * (_vertexPermutationIndex/3);
-        float xScale = _vertexPermutationIndex%2==0? 1f: -1f;
-        vertexRenderer.gameObject.transform.Rotate(new Vector3(0, 0, angle));
+        float angle = 120f * (_vertexPermutationIndex/2);
+        float xScale = _vertexPermutationIndex % 2 == 0 ? 1f: -1f;
+
+        Debug.Log(string.Format("Angle: {0}, xScale: {1}", angle, xScale));
+
+        vertexRenderer.gameObject.transform.rotation = Quaternion.identity;
+        vertexRenderer.gameObject.transform.Rotate(new Vector3(0, 0, -angle));
         vertexRenderer.gameObject.transform.localScale = new Vector3(xScale, 1, 1);
         vertexRenderer.enabled = true;
 
@@ -215,7 +226,7 @@ public class HexTile : MonoBehaviour
 
         } else if (timerActive) {
             secondsLeft --;
-            SFNGame.AddScore(-1);
+            gameManager.AddScore(-1);
         }
     }
 
@@ -238,6 +249,16 @@ public class HexTile : MonoBehaviour
     public bool hasVertices()
     {
         return vertexPermutationIndex != null;
+    }
+
+    public void setGameManager(GameManager _gameManager)
+    {
+        gameManager = _gameManager;
+    }
+
+    public void MarkStartTile()
+    {
+        isStartTile = true;
     }
 
 }

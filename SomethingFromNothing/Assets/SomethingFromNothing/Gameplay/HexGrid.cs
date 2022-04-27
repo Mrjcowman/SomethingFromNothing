@@ -8,6 +8,8 @@ public class HexGrid : MonoBehaviour
 {
     public HexTile pfHexTile;
     public VertexNode pfVertexNode;
+    public GameManager gameManager;
+
     GridLayout gridLayout;
     Dictionary<Vector2Int, HexTile> tiles;
     Dictionary<Vector2Int, VertexNode> nodes;   // Node positions are written as the cell directly to the south of the node
@@ -20,11 +22,11 @@ public class HexGrid : MonoBehaviour
         nodes = new Dictionary<Vector2Int, VertexNode>();
 
         // TODO: populate the game start state
-        CreateEmptyTile(Vector2Int.zero);
-        CreateEmptyTile(Vector2Int.up);
-        CreateEmptyTile(Vector2Int.up + Vector2Int.left);
+        CreateStartTile(Vector2Int.zero);
+        CreateStartTile(Vector2Int.up);
+        CreateStartTile(Vector2Int.up + Vector2Int.left);
 
-        SFNGame.ResetScore();
+        gameManager.ResetScore();
     }
 
     // Update is called once per frame
@@ -38,9 +40,9 @@ public class HexGrid : MonoBehaviour
             
             // If there is an open space in thatt position, place the tile
             if (tiles.ContainsKey(cellPos) && tiles[cellPos].IsEmpty()) {
-                // TODO: get value from upcoming tiles
-                tiles[cellPos].Place(Random.Range(0,6));
-                Debug.Log("Valid position!");
+                tiles[cellPos].Place(gameManager.GetUpcomingVertexPermutationIndex());
+                Debug.Log(gameManager.GetUpcomingVertexPermutationIndex());
+                gameManager.NewUpcomingTile();
             } else {
                 Debug.Log("Invalid position!");
             }
@@ -94,9 +96,16 @@ public class HexGrid : MonoBehaviour
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
         tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
         tiles[cellPos].setGrid(this);
+        tiles[cellPos].setGameManager(gameManager);
         tiles[cellPos].setCellPosition(cellPos);
         tiles[cellPos].setAdjacentNodes(getAdjacentNodes(cellPos));
         tiles[cellPos].setAdjacentTiles(getAdjacentTilesToTile(cellPos));
+    }
+
+    void CreateStartTile(Vector2Int cellPos)
+    {
+        CreateEmptyTile(cellPos);
+        tiles[cellPos].MarkStartTile();
     }
 
     void CreateNode(Vector2Int vertPos)
