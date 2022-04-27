@@ -9,6 +9,7 @@ public class HexGrid : MonoBehaviour
     public HexTile pfHexTile;
     GridLayout gridLayout;
     Dictionary<Vector2Int, HexTile> tiles;
+    Dictionary<Vector2Int, VertexNode> nodes;   // Node positions are written as the cell directly to the south of the node
 
     // Start is called before the first frame update
     void Start()
@@ -41,8 +42,40 @@ public class HexGrid : MonoBehaviour
         }
     }
 
-    void CreateEmptyTile(Vector2Int cellPos) {
+    // Create a new tile at cellPos and initialize its data to be an empty space
+    void CreateEmptyTile(Vector2Int cellPos)
+    {
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
         tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
+        tiles[cellPos].setGrid(this);
+        tiles[cellPos].setCellPosition(cellPos);
     }
+
+    public VertexNode[] getAdjacentNodes(Vector2Int cellPos)
+    {
+        return new VertexNode[3];
+    }
+
+    #nullable enable
+    public HexTile?[] getAdjacentTiles(Vector2Int cellPos)
+    {
+        HexTile?[] adjacent = new HexTile?[6];
+        adjacent[0] = getTile(cellPos + Vector2Int.up);
+        adjacent[1] = getTile(cellPos + Vector2Int.right);
+        adjacent[2] = getTile(cellPos + Vector2Int.down + Vector2Int.right);
+        adjacent[3] = getTile(cellPos + Vector2Int.down);
+        adjacent[4] = getTile(cellPos + Vector2Int.left);
+        adjacent[5] = getTile(cellPos + Vector2Int.up + Vector2Int.left);
+
+        return adjacent;
+    }
+
+    HexTile? getTile(Vector2Int cellPos)
+    {
+        if (tiles.ContainsKey(cellPos))
+            return tiles[cellPos];
+        else
+            return null;
+    }
+    
 }
