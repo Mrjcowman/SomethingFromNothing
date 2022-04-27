@@ -7,13 +7,21 @@ using UnityEngine;
 // carry the heavy-lifting for scoring and game state management.
 public class HexTile : MonoBehaviour
 {
-    // TODO: Reference to 6 adjacent tiles. Null is allowed
+    // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
     HexTile[] adjacentTiles;
 
-    // TODO: Reference to 3 adjacent nodes. Null is NOT allowed
+    // Reference to 3 adjacent nodes clockwise from 12:00 position. Null is NOT allowed
     VertexNode[] adjacentNodes;
 
     // TODO: Enumerate state
+    public enum ETileState {
+        Empty,
+        Grown,
+        Burned,
+        Default
+    }
+    ETileState tileState;
+
     EVertexType[] vertexPermutation;
 
     float secondsLeft;
@@ -60,6 +68,10 @@ public class HexTile : MonoBehaviour
 
     public EVertexType GetVertex(int index) {
         return vertexPermutation[index];
+    }
+
+    public ETileState GetTileState() {
+        return tileState;
     }
 
 }
