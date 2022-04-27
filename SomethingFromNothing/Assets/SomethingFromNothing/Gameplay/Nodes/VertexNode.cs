@@ -16,10 +16,14 @@ public class VertexNode : MonoBehaviour
     HexTile?[] adjacentTiles = new HexTile?[6];        // Null members are allowed
 #nullable disable
 
+    SpriteRenderer spriteRenderer;
+
     // Start is called before the first frame update
     void Start()
     {
         isGrown = false;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.enabled = false;
     }
 
     // Update is called once per frame
@@ -43,40 +47,53 @@ public class VertexNode : MonoBehaviour
         adjacentTiles = _adjacentTiles;
     }
 
+    public void setAdjacentTile(int index, HexTile tile)
+    {
+        adjacentTiles[index] = tile;
+    }
+
     // When a new tile is placed adjacent, check to see if growth
     // is allowed and grow if able
-    void AddTile()
+    public void AddTile()
     {
+        Debug.Log("Tile added!");
+
         // Three different vertices must meet to be a valid growth location
-        if (adjacentTiles[0] && adjacentTiles[1] && adjacentTiles[2])
+        if (adjacentTiles[0] is not null && adjacentTiles[1] is not null && adjacentTiles[2] is not null)
         {
-            EVertexType tile0Vert = adjacentTiles[0].GetVertex(0);
-            EVertexType tile1Vert = adjacentTiles[1].GetVertex(1);
-            EVertexType tile2Vert = adjacentTiles[2].GetVertex(2);
-            
-            // If they are all different, grow!
-            if (tile0Vert!=tile1Vert && tile1Vert!=tile2Vert && tile2Vert!=tile0Vert)
+            Debug.Log("null check passed!");
+            if (adjacentTiles[0].hasVertices() && adjacentTiles[1].hasVertices() && adjacentTiles[2].hasVertices())
             {
-                Grow();
-            }
-        } else
-            return;
+                Debug.Log("has Vertices check passed!");
+                EVertexType tile0Vert = adjacentTiles[0].GetVertex(0);
+                EVertexType tile1Vert = adjacentTiles[1].GetVertex(1);
+                EVertexType tile2Vert = adjacentTiles[2].GetVertex(2);
+            
+                // If they are all different, grow!
+                if (tile0Vert!=tile1Vert && tile1Vert!=tile2Vert && tile2Vert!=tile0Vert)
+                {
+                    Grow();
+                }
+            } else return;
+        } else return;
     }
 
     // When growth is possible, change the sprite and state to match
     void Grow()
     {
+        Debug.Log("Grown!");
         isGrown = true;
-        // TODO: show sprite
+        spriteRenderer.enabled = true;
     }
 
     // When an adjacent tile burns, so does this node.
-    void Burn()
+    public void Burn()
     {
         // reset state
         isGrown = false;
 
         // hide sprite
+        spriteRenderer.enabled = false;
     }
 
     public bool IsGrown()

@@ -83,6 +83,10 @@ public class HexTile : MonoBehaviour
     public void setAdjacentNodes(VertexNode[] _adjacentNodes)
     {
         adjacentNodes = _adjacentNodes;
+        for (int i = 0; i < _adjacentNodes.Length; i++)
+        {
+            adjacentNodes[i].setAdjacentTile(i, this);
+        }
     }
 
     public void setAdjacentTiles(HexTile?[] _adjacentTiles)
@@ -106,7 +110,7 @@ public class HexTile : MonoBehaviour
 
     }
 
-    // On placement, expand the node system and notify adjacent pieces of its existence.
+    // On placement, notify adjacent pieces of its existence.
     // Also start the timer
     public void Place()
     {
@@ -114,6 +118,15 @@ public class HexTile : MonoBehaviour
         spriteRenderer.sprite = spriteDefault;
         secondsLeft = MAX_SECONDS_LEFT;
         timerActive = true;
+
+        // TODO: set vertex permutation
+        vertexPermutation = possibleVertexPermutations[0];
+
+        foreach (VertexNode node in adjacentNodes)
+        {
+            node.AddTile();
+        }
+
     }
 
     // If a tree grows on an adjacent node, this tile becomes grown and adjacent
@@ -132,7 +145,25 @@ public class HexTile : MonoBehaviour
     {
         tileState = ETileState.Burned;
         spriteRenderer.sprite = spriteBurned;
-        //TODO: update sprite and burn adjacent tiles
+
+        vertexPermutation = null;
+        
+        foreach (HexTile? tile in adjacentTiles)
+        {
+            if (tile is not null)
+                tile.Damage();
+        }
+
+        foreach (VertexNode node in adjacentNodes)
+        {
+            node.Burn();
+        }
+    }
+
+    public void Damage()
+    {
+        secondsLeft --;
+        SFNGame.AddScore(-1);
     }
 
     public EVertexType GetVertex(int index) {
@@ -145,6 +176,11 @@ public class HexTile : MonoBehaviour
 
     public bool IsGrown() {
         return tileState == ETileState.Grown;
+    }
+
+    public bool hasVertices()
+    {
+        return vertexPermutation is not null;
     }
 
 }
