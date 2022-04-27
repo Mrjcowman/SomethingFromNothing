@@ -26,6 +26,16 @@ public class HexTile : MonoBehaviour
     }
     ETileState tileState;
 
+    // Every possible permutation of vertices. Odd indices are mirrors of the preceding even indices
+    static readonly EVertexType[][] possibleVertexPermutations = new EVertexType[][]
+    {
+        new EVertexType[] {EVertexType.Sun, EVertexType.Nutrients, EVertexType.Water},
+        new EVertexType[] {EVertexType.Sun, EVertexType.Water, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Nutrients, EVertexType.Water, EVertexType.Sun},
+        new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
+        new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun}
+    };
     EVertexType[] vertexPermutation;
 
     public Sprite spriteEmpty, spriteGrown, spriteBurned, spriteDefault;
