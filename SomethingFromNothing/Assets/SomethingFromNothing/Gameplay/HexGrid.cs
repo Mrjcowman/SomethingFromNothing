@@ -38,7 +38,8 @@ public class HexGrid : MonoBehaviour
             
             // If there is an open space in thatt position, place the tile
             if (tiles.ContainsKey(cellPos) && tiles[cellPos].IsEmpty()) {
-                tiles[cellPos].Place();
+                // TODO: get value from upcoming tiles
+                tiles[cellPos].Place(Random.Range(0,6));
                 Debug.Log("Valid position!");
             } else {
                 Debug.Log("Invalid position!");

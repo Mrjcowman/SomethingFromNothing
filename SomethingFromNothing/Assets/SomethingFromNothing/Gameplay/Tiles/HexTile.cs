@@ -28,17 +28,17 @@ public class HexTile : MonoBehaviour
     }
     ETileState tileState;
 
-    // Every possible permutation of vertices. Odd indices are mirrors of the preceding even indices
+    // Every possible permutation of vertices. Odd indices are x-mirrors of the preceding even indices
     static readonly EVertexType[][] possibleVertexPermutations = new EVertexType[][]
     {
         new EVertexType[] {EVertexType.Sun, EVertexType.Nutrients, EVertexType.Water},
         new EVertexType[] {EVertexType.Sun, EVertexType.Water, EVertexType.Nutrients},
         new EVertexType[] {EVertexType.Nutrients, EVertexType.Water, EVertexType.Sun},
+        new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun},
         new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
         new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
-        new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun}
     };
-    EVertexType[] vertexPermutation;
+    int? vertexPermutationIndex;
 
     public Sprite spriteEmpty, spriteGrown, spriteBurned, spriteDefault;
     SpriteRenderer spriteRenderer;
@@ -137,21 +137,25 @@ public class HexTile : MonoBehaviour
 
     // On placement, notify adjacent pieces of its existence.
     // Also start the timer
-    public void Place()
+    public void Place(int _vertexPermutationIndex)
     {
         tileState = ETileState.Default;
         spriteRenderer.sprite = spriteDefault;
         secondsLeft = MAX_SECONDS_LEFT;
         timerActive = true;
 
-        // TODO: set vertex permutation
-        vertexPermutation = possibleVertexPermutations[0];
+        vertexPermutationIndex = _vertexPermutationIndex;
 
         foreach (VertexNode node in adjacentNodes)
         {
             node.AddTile();
         }
 
+        // Rotate/mirror the vertices based on permutation
+        float angle = 120f * (_vertexPermutationIndex/3);
+        float xScale = _vertexPermutationIndex%2==0? 1f: -1f;
+        vertexRenderer.gameObject.transform.Rotate(new Vector3(0, 0, angle));
+        vertexRenderer.gameObject.transform.localScale = new Vector3(xScale, 1, 1);
         vertexRenderer.enabled = true;
 
     }
@@ -173,7 +177,7 @@ public class HexTile : MonoBehaviour
         tileState = ETileState.Burned;
         spriteRenderer.sprite = spriteBurned;
 
-        vertexPermutation = null;
+        vertexPermutationIndex = null;
         vertexRenderer.enabled = false;
         
         foreach (HexTile? tile in adjacentTiles)
@@ -216,7 +220,11 @@ public class HexTile : MonoBehaviour
     }
 
     public EVertexType GetVertex(int index) {
-        return vertexPermutation[index];
+        if (vertexPermutationIndex == null)
+            throw new System.Exception("Tried to access a vertex from a null cell!");
+        
+        return possibleVertexPermutations[(int)vertexPermutationIndex][index];
+            
     }
 
     public bool IsEmpty() {
@@ -229,7 +237,7 @@ public class HexTile : MonoBehaviour
 
     public bool hasVertices()
     {
-        return vertexPermutation != null;
+        return vertexPermutationIndex != null;
     }
 
 }
