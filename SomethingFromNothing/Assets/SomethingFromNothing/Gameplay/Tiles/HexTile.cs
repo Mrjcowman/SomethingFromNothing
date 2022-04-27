@@ -113,7 +113,7 @@ public class HexTile : MonoBehaviour
         adjacentTiles = _adjacentTiles;
         for (int i = 0; i < _adjacentTiles.Length; i++)
         {
-            if (adjacentTiles[i] is not null)
+            if (adjacentTiles[i] != null)
             {
                 // (i+3)%6 rotates the index 180 degrees
                 adjacentTiles[i].setAdjacentTile((i+3)%6, this);
@@ -178,7 +178,7 @@ public class HexTile : MonoBehaviour
         
         foreach (HexTile? tile in adjacentTiles)
         {
-            if (tile is not null)
+            if (tile != null)
                 tile.Damage();
         }
 
@@ -197,7 +197,7 @@ public class HexTile : MonoBehaviour
             bool stillValid = false;
             foreach (HexTile? tile in adjacentTiles)
             {
-                if (tile is not null) {
+                if (tile != null) {
                     if (tile.IsGrown()){
                         stillValid = true;
                         break;
@@ -229,7 +229,7 @@ public class HexTile : MonoBehaviour
 
     public bool hasVertices()
     {
-        return vertexPermutation is not null;
+        return vertexPermutation != null;
     }
 
 }

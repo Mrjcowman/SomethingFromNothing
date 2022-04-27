@@ -59,7 +59,7 @@ public class VertexNode : MonoBehaviour
         Debug.Log("Tile added!");
 
         // Three different vertices must meet to be a valid growth location
-        if (adjacentTiles[0] is not null && adjacentTiles[1] is not null && adjacentTiles[2] is not null)
+        if (adjacentTiles[0] != null && adjacentTiles[1] != null && adjacentTiles[2] != null)
         {
             Debug.Log("null check passed!");
             if (adjacentTiles[0].hasVertices() && adjacentTiles[1].hasVertices() && adjacentTiles[2].hasVertices())
@@ -87,7 +87,7 @@ public class VertexNode : MonoBehaviour
 
         foreach (HexTile? tile in adjacentTiles)
         {
-            if (tile is not null)
+            if (tile != null)
                 tile.Grow();
         }
     }

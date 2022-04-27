@@ -156,7 +156,7 @@ public class HexGrid : MonoBehaviour
         HexTile?[] adjacent = getAdjacentTilesToTile(cellPos);
         for(int i = 0; i<6; i++)
         {
-            if (adjacent[i] is null) {
+            if (adjacent[i] == null) {
                 CreateEmptyTile(getAdjacentCell(cellPos, (EHexDirection)i));
             }
         }
