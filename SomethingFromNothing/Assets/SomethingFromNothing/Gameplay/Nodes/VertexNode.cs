@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using SomethingFromNothing;
@@ -8,7 +9,12 @@ using UnityEngine;
 public class VertexNode : MonoBehaviour
 {
     bool isGrown;
-    HexTile[] adjacentTiles;        // Null members are allowed
+    Vector2Int vertPos;
+    HexGrid grid;
+
+#nullable enable
+    HexTile?[] adjacentTiles = new HexTile?[6];        // Null members are allowed
+#nullable disable
 
     // Start is called before the first frame update
     void Start()
@@ -20,6 +26,21 @@ public class VertexNode : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void setGrid(HexGrid _grid)
+    {
+        grid = _grid;
+    }
+
+    public void setVertexPosition(Vector2Int _vertPos)
+    {
+        vertPos = _vertPos;
+    }
+
+    public void setAdjacentTiles(HexTile?[] _adjacentTiles)
+    {
+        adjacentTiles = _adjacentTiles;
     }
 
     // When a new tile is placed adjacent, check to see if growth
