@@ -44,6 +44,10 @@ public class HexGrid : MonoBehaviour
                 Debug.Log("Invalid position!");
             }
         }
+
+        if (Input.GetKeyDown("escape")) {
+            Application.Quit();
+        }
     }
 
     // Given as clock directions pointing to the center of the sides
