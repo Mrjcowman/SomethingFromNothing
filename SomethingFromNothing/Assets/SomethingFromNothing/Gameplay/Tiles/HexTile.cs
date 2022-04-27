@@ -10,7 +10,7 @@ using TMPro;
 public class HexTile : MonoBehaviour
 {
     // Tunable variables
-    const float MAX_SECONDS_LEFT = 10;
+    const float MAX_SECONDS_LEFT = 15;
 
     HexGrid grid;
     GameManager gameManager;
