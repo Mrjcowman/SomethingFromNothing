@@ -9,7 +9,7 @@ using UnityEngine;
 public class HexTile : MonoBehaviour
 {
     // Tunable variables
-    const float MAX_SECONDS_LEFT = 5;
+    const float MAX_SECONDS_LEFT = 10;
 
     HexGrid grid;
 
@@ -80,6 +80,7 @@ public class HexTile : MonoBehaviour
         cellPosition = _cellPosition;
     }
 
+    // Set my adjacent nodes and let them know I exist
     public void setAdjacentNodes(VertexNode[] _adjacentNodes)
     {
         adjacentNodes = _adjacentNodes;
@@ -89,6 +90,7 @@ public class HexTile : MonoBehaviour
         }
     }
 
+    // Set my adjacent tiles and let them know I exist
     public void setAdjacentTiles(HexTile?[] _adjacentTiles)
     {
         adjacentTiles = _adjacentTiles;
@@ -149,7 +151,6 @@ public class HexTile : MonoBehaviour
     {
         tileState = ETileState.Grown;
         spriteRenderer.sprite = spriteGrown;
-        //TODO: create empty spaces
         grid.PopulateAdjacentTiles(cellPosition);
     }
 
@@ -174,6 +175,7 @@ public class HexTile : MonoBehaviour
         }
     }
 
+    // Destroy stranded empty spaces and damage active tiles
     public void Damage()
     {
         Debug.Log(string.Format("Damaged! Position {0}, {1}", cellPosition.x, cellPosition.y));
