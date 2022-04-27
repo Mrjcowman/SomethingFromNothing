@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using SomethingFromNothing;
 using UnityEngine;
 
+
 // HexTiles are the core game piece. They have 4 states (empty, grown, burned, and default) and
 // carry the heavy-lifting for scoring and game state management.
 public class HexTile : MonoBehaviour
 {
+
+    const float MAX_SECONDS_LEFT = 10;
+
     // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
     HexTile[] adjacentTiles;
 
@@ -14,7 +18,7 @@ public class HexTile : MonoBehaviour
     VertexNode[] adjacentNodes;
 
     // TODO: Enumerate state
-    public enum ETileState {
+    enum ETileState {
         Empty,
         Grown,
         Burned,
@@ -24,11 +28,17 @@ public class HexTile : MonoBehaviour
 
     EVertexType[] vertexPermutation;
 
+    public Sprite spriteEmpty, spriteGrown, spriteBurned, spriteDefault;
+    SpriteRenderer spriteRenderer;
+
     float secondsLeft;
 
     void Start()
     {
         secondsLeft = -1;
+        tileState = ETileState.Empty;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = spriteEmpty;
     }
 
     // Update is called once per frame
@@ -41,37 +51,50 @@ public class HexTile : MonoBehaviour
     // and update the UI timer display
     void OnTimerTick()
     {
-
+        if (adjacentNodes[0].IsGrown()) SFNGame.AddScore(1);
+        if (adjacentNodes[1].IsGrown()) SFNGame.AddScore(1);
+        if (adjacentNodes[2].IsGrown()) SFNGame.AddScore(1);
     }
 
     // On placement, expand the node system and notify adjacent pieces of its existence.
     // Also start the timer
-    void Place()
+    public void Place()
     {
-
+        tileState = ETileState.Default;
+        spriteRenderer.sprite = spriteDefault;
+        secondsLeft = MAX_SECONDS_LEFT;
+        //TODO: update sprite and start timer
     }
 
     // If a tree grows on an adjacent node, this tile becomes grown and adjacent
     // spaces become valid for new tile placement (All null references to adjacent
     // tiles are populated with new empty tiles)
-    void Grow()
+    public void Grow()
     {
-
+        tileState = ETileState.Grown;
+        spriteRenderer.sprite = spriteGrown;
+        //TODO: update sprite and create empty spaces
     }
 
     // When the time is up, destroy adjacent trees and any spaces that might 
     // become invalid. Damage adjacent tiles and update texture to fire
-    void Burn()
+    public void Burn()
     {
-
+        tileState = ETileState.Burned;
+        spriteRenderer.sprite = spriteBurned;
+        //TODO: update sprite and burn adjacent tiles
     }
 
     public EVertexType GetVertex(int index) {
         return vertexPermutation[index];
     }
 
-    public ETileState GetTileState() {
-        return tileState;
+    public bool IsEmpty() {
+        return tileState == ETileState.Empty;
+    }
+
+    public bool IsGrown() {
+        return tileState == ETileState.Grown;
     }
 
 }
