@@ -150,8 +150,8 @@ public class HexTile : MonoBehaviour
         timerActive = true;
 
         vertexPermutationIndex = _vertexPermutationIndex;
+        grid.AddActiveNode();
 
-        Debug.Log(string.Format("Permutation: {0}", vertexPermutationIndex));
 
         foreach (VertexNode node in adjacentNodes)
         {
@@ -162,7 +162,6 @@ public class HexTile : MonoBehaviour
         float angle = 120f * (_vertexPermutationIndex/2);
         float xScale = _vertexPermutationIndex % 2 == 0 ? 1f: -1f;
 
-        Debug.Log(string.Format("Angle: {0}, xScale: {1}", angle, xScale));
 
         vertexRenderer.gameObject.transform.rotation = Quaternion.identity;
         vertexRenderer.gameObject.transform.Rotate(new Vector3(0, 0, -angle));
@@ -185,6 +184,7 @@ public class HexTile : MonoBehaviour
     // become invalid. Damage adjacent tiles and update texture to fire
     public void Burn()
     {
+        grid.RemoveActiveNode();
         tileState = ETileState.Burned;
         spriteRenderer.sprite = spriteBurned;
 
@@ -206,7 +206,6 @@ public class HexTile : MonoBehaviour
     // Destroy stranded empty spaces and damage active tiles
     public void Damage()
     {
-        Debug.Log(string.Format("Damaged! Position {0}, {1}", cellPosition.x, cellPosition.y));
         if(tileState == ETileState.Empty)
         {
             bool stillValid = false;
