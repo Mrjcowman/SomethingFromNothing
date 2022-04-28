@@ -150,7 +150,7 @@ public class HexTile : MonoBehaviour
         timerActive = true;
 
         vertexPermutationIndex = _vertexPermutationIndex;
-        grid.AddActiveNode();
+        grid.AddActiveTile();
 
 
         foreach (VertexNode node in adjacentNodes)
@@ -184,7 +184,7 @@ public class HexTile : MonoBehaviour
     // become invalid. Damage adjacent tiles and update texture to fire
     public void Burn()
     {
-        grid.RemoveActiveNode();
+        grid.RemoveActiveTile();
         tileState = ETileState.Burned;
         spriteRenderer.sprite = spriteBurned;
 
