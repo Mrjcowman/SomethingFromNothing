@@ -227,6 +227,9 @@ public class HexTile : MonoBehaviour
             }
 
             if (!stillValid) {
+                Debug.Log("Tile no longer valid!");
+                grid.RemoveActiveTile();
+                grid.RemoveViableSpace();
                 Destroy(gameObject);
             }
 

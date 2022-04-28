@@ -17,6 +17,9 @@ public class HexGrid : MonoBehaviour
     Dictionary<Vector2Int, HexTile> tiles;
     Dictionary<Vector2Int, VertexNode> nodes;   // Node positions are written as the cell directly to the south of the node
     int activeTiles;
+    int viableSpaces;
+
+    bool firstTick = true;
 
 
     // ================================================================================================================================
@@ -34,9 +37,13 @@ public class HexGrid : MonoBehaviour
 
     void Update()
     {
+        if (firstTick) {
+            firstTick = false;
+            return;
+        }
         // Get clicked coordinates
         if (Input.GetMouseButtonDown(0)) {
-            Debug.Log(string.Format("active Nodes: {0}", activeTiles));
+            Debug.Log(string.Format("viable spaces: {0}", viableSpaces));
             Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
             Vector2Int cellPos = (Vector2Int) gridLayout.WorldToCell(pos);   // conversion drops the z
@@ -52,12 +59,13 @@ public class HexGrid : MonoBehaviour
         }
 
         if (Input.GetKeyDown("escape")) {
-            Application.Quit();
+            gameManager.EndGame();
         }
 
-        // TODO: handle game end
-        if (activeTiles < 1) {
+        // TODO: handle game end better
+        if (viableSpaces < 1) {
             Debug.Log("Game end!!");
+            gameManager.EndGame();
         }
     }
 
@@ -71,6 +79,7 @@ public class HexGrid : MonoBehaviour
         tiles = new Dictionary<Vector2Int, HexTile>();
         nodes = new Dictionary<Vector2Int, VertexNode>();
         activeTiles = 0;
+        viableSpaces = 0;
 
         gameManager.ResetScore();
     }
@@ -86,6 +95,7 @@ public class HexGrid : MonoBehaviour
     public void AddActiveTile()
     {
         activeTiles++;
+        RemoveViableSpace();
     }
 
     public void RemoveActiveTile()
@@ -93,6 +103,13 @@ public class HexGrid : MonoBehaviour
         activeTiles--;
     }
 
+    /// <summary>
+    /// Decrement the number of viable spaces when an empty HexTile is lost or state changed
+    /// </summary>
+    public void RemoveViableSpace()
+    {
+        viableSpaces--;
+    }
     // TILE HANDLERS
 
     #nullable enable
@@ -119,6 +136,7 @@ public class HexGrid : MonoBehaviour
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
         tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
         tiles[cellPos].Initialize(gameManager, this, cellPos, false);
+        viableSpaces++;
     }
 
     /// <summary>
@@ -130,6 +148,7 @@ public class HexGrid : MonoBehaviour
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
         tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
         tiles[cellPos].Initialize(gameManager, this, cellPos, true);
+        viableSpaces++; // These immediately get removed when tiles grow
     }
 
     #nullable enable
