@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
     int score = 0;
     int upcomingVertexPermutationIndex;
 
-    public HexGrid grid;
+    public HexGrid pfHexGrid;
+    HexGrid grid;
     public CanvasRenderer upcomingTileDisplay;
 
     public TextMeshProUGUI scoreText;
@@ -44,6 +45,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         NewUpcomingTile();
+        grid = Instantiate(pfHexGrid, Vector3.zero, Quaternion.identity);
+        grid.Initialize(this);
     }
 
     // Update is called once per frame

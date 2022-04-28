@@ -7,11 +7,11 @@ using SomethingFromNothing;
 public class HexGrid : MonoBehaviour
 {
 
-    // Prefab references
+    // PREFABS
     public HexTile pfHexTile;
     public VertexNode pfVertexNode;
 
-    // // Fields
+    // FIELDS
     GameManager gameManager;
     GridLayout gridLayout;
     Dictionary<Vector2Int, HexTile> tiles;
@@ -25,16 +25,11 @@ public class HexGrid : MonoBehaviour
     void Start()
     {
         gridLayout = transform.GetComponent<GridLayout>();
-        tiles = new Dictionary<Vector2Int, HexTile>();
-        nodes = new Dictionary<Vector2Int, VertexNode>();
-        activeTiles = 0;
 
         // populate the game start state
         CreateStartTile(Vector2Int.zero);
         CreateStartTile(Vector2Int.up);
         CreateStartTile(Vector2Int.up + Vector2Int.left);
-
-        gameManager.ResetScore();
     }
 
     void Update()
@@ -69,9 +64,15 @@ public class HexGrid : MonoBehaviour
     /// <summary>
     /// Set up a clean hex grid with starting tiles
     /// </summary>
-    void Initialize()
+    /// <param name="_gameManager">The owning GameManager</param>
+    public void Initialize(GameManager _gameManager)
     {
-        // TODO: implement
+        gameManager = _gameManager;
+        tiles = new Dictionary<Vector2Int, HexTile>();
+        nodes = new Dictionary<Vector2Int, VertexNode>();
+        activeTiles = 0;
+
+        gameManager.ResetScore();
     }
 
     /// <summary>
@@ -100,7 +101,7 @@ public class HexGrid : MonoBehaviour
     /// </summary>
     /// <param name="cellPos">The coordinates of the grid cell for the tile</param>
     /// <returns>The tile at the position, or null if no tile exists there</returns>
-    HexTile? getTile(Vector2Int cellPos)
+    HexTile? GetTile(Vector2Int cellPos)
     {
         if (tiles.ContainsKey(cellPos))
             return tiles[cellPos];
@@ -117,11 +118,7 @@ public class HexGrid : MonoBehaviour
     {
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
         tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
-        tiles[cellPos].setGrid(this);
-        tiles[cellPos].setGameManager(gameManager);
-        tiles[cellPos].setCellPosition(cellPos);
-        tiles[cellPos].setAdjacentNodes(getAdjacentNodes(cellPos));
-        tiles[cellPos].setAdjacentTiles(getAdjacentTilesToTile(cellPos));
+        tiles[cellPos].Initialize(gameManager, this, cellPos, false);
     }
 
     /// <summary>
@@ -130,8 +127,9 @@ public class HexGrid : MonoBehaviour
     /// <param name="cellPos">The coordinates of the grid cell for the tile</param>
     void CreateStartTile(Vector2Int cellPos)
     {
-        CreateEmptyTile(cellPos);
-        tiles[cellPos].MarkStartTile();
+        Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)cellPos);
+        tiles[cellPos] = Instantiate(pfHexTile, worldPos, Quaternion.identity);
+        tiles[cellPos].Initialize(gameManager, this, cellPos, true);
     }
 
     #nullable enable
@@ -140,15 +138,15 @@ public class HexGrid : MonoBehaviour
     /// </summary>
     /// <param name="cellPos">The coordinates of the tile being checked for adjacency</param>
     /// <returns>An array of 6 adjacent HexTiles or nulls for non-existent tiles</returns>
-    public HexTile?[] getAdjacentTilesToTile(Vector2Int cellPos)
+    public HexTile?[] GetAdjacentTilesToTile(Vector2Int cellPos)
     {
         HexTile?[] adjacent = new HexTile?[6];
-        adjacent[0] = getTile(getAdjacentCell(cellPos, EHexDirection.One));
-        adjacent[1] = getTile(getAdjacentCell(cellPos, EHexDirection.Three));
-        adjacent[2] = getTile(getAdjacentCell(cellPos, EHexDirection.Five));
-        adjacent[3] = getTile(getAdjacentCell(cellPos, EHexDirection.Seven));
-        adjacent[4] = getTile(getAdjacentCell(cellPos, EHexDirection.Nine));
-        adjacent[5] = getTile(getAdjacentCell(cellPos, EHexDirection.Eleven));
+        adjacent[0] = GetTile(GetAdjacentCell(cellPos, EHexDirection.One));
+        adjacent[1] = GetTile(GetAdjacentCell(cellPos, EHexDirection.Three));
+        adjacent[2] = GetTile(GetAdjacentCell(cellPos, EHexDirection.Five));
+        adjacent[3] = GetTile(GetAdjacentCell(cellPos, EHexDirection.Seven));
+        adjacent[4] = GetTile(GetAdjacentCell(cellPos, EHexDirection.Nine));
+        adjacent[5] = GetTile(GetAdjacentCell(cellPos, EHexDirection.Eleven));
 
         return adjacent;
     }
@@ -160,13 +158,13 @@ public class HexGrid : MonoBehaviour
     /// </summary>
     /// <param name="cellPos">The coordinates of the tile being checked for adjacency</param>
     /// <returns>An array of 3 adjacent VertexNodes</returns>
-    public VertexNode[] getAdjacentNodes(Vector2Int cellPos)
+    public VertexNode[] GetAdjacentNodes(Vector2Int cellPos)
     {
         return new VertexNode[]
         {
-            getNode(cellPos),
-            getNode(getAdjacentCell(cellPos, EHexDirection.Five)),
-            getNode(getAdjacentCell(cellPos, EHexDirection.Seven))
+            GetNode(cellPos),
+            GetNode(GetAdjacentCell(cellPos, EHexDirection.Five)),
+            GetNode(GetAdjacentCell(cellPos, EHexDirection.Seven))
         };
     }
 
@@ -177,11 +175,11 @@ public class HexGrid : MonoBehaviour
     /// <param name="cellPos">The coordinates of the tile being checked for adjacency</param>
     public void PopulateAdjacentTiles(Vector2Int cellPos)
     {
-        HexTile?[] adjacent = getAdjacentTilesToTile(cellPos);
+        HexTile?[] adjacent = GetAdjacentTilesToTile(cellPos);
         for(int i = 0; i<6; i++)
         {
             if (adjacent[i] == null) {
-                CreateEmptyTile(getAdjacentCell(cellPos, (EHexDirection)i));
+                CreateEmptyTile(GetAdjacentCell(cellPos, (EHexDirection)i));
             }
         }
     }
@@ -194,7 +192,7 @@ public class HexGrid : MonoBehaviour
     /// </summary>
     /// <param name="vertPos">The coordinates of the grid cell whose top vertex matches with the node</param>
     /// <returns>The VertexNode at the given position</returns>
-    VertexNode getNode(Vector2Int vertPos)
+    VertexNode GetNode(Vector2Int vertPos)
     {
         if (!nodes.ContainsKey(vertPos))
             CreateNode(vertPos);
@@ -210,9 +208,7 @@ public class HexGrid : MonoBehaviour
     {
         Vector3 worldPos = gridLayout.CellToWorld((Vector3Int)vertPos)+Vector3.up;
         nodes[vertPos] = Instantiate(pfVertexNode, worldPos, Quaternion.identity);
-        nodes[vertPos].setGrid(this);
-        nodes[vertPos].setVertexPosition(vertPos);
-        nodes[vertPos].setAdjacentTiles(getAdjacentTilesToNode(vertPos));
+        nodes[vertPos].Initialize(gameManager, this, vertPos);
     }
 
     #nullable enable
@@ -221,25 +217,25 @@ public class HexGrid : MonoBehaviour
     /// </summary>
     /// <param name="vertPos">The coordinates of the grid cell whose top vertex matches with the node</param>
     /// <returns>An array of 6 adjacent HexTiles or nulls for non-existent tiles</returns>
-    public HexTile?[] getAdjacentTilesToNode(Vector2Int vertPos)
+    public HexTile?[] GetAdjacentTilesToNode(Vector2Int vertPos)
     {
         // The order here is reversed to make indexing in the match step easier
         HexTile?[] adjacent = new HexTile?[3];
-        adjacent[0] = getTile(vertPos);
-        adjacent[1] = getTile(getAdjacentCell(vertPos, EHexDirection.Eleven));
-        adjacent[2] = getTile(getAdjacentCell(vertPos, EHexDirection.One));
+        adjacent[0] = GetTile(vertPos);
+        adjacent[1] = GetTile(GetAdjacentCell(vertPos, EHexDirection.Eleven));
+        adjacent[2] = GetTile(GetAdjacentCell(vertPos, EHexDirection.One));
 
         return adjacent;
     }
     #nullable disable
 
-    // ================================================================================================================================
-    // ENUMS AND HELPERS
+    
 
     /// <summary>
     /// Hexagonal directions given as clock positions pointing to the centers of adjacent hexes
     /// </summary>
-    public enum EHexDirection {
+    public enum EHexDirection
+    {
         One,
         Three,
         Five,
@@ -254,7 +250,7 @@ public class HexGrid : MonoBehaviour
     /// <param name="startCell">The coordinates of the cell at the origin of the motion</param>
     /// <param name="direction">The hexagonal direction being searched</param>
     /// <returns>A Vector2Int of the coordinates at the looked-up position</returns>
-    public static Vector2Int getAdjacentCell(Vector2Int startCell, EHexDirection direction)
+    public static Vector2Int GetAdjacentCell(Vector2Int startCell, EHexDirection direction)
     {
         // Even cells are shifted right, Odd cells are shifted left
         if (startCell.y % 2 == 0) {

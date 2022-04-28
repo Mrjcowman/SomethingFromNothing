@@ -4,59 +4,48 @@ using SomethingFromNothing;
 using UnityEngine;
 using TMPro;
 
-
-// HexTiles are the core game piece. They have 4 states (empty, grown, burned, and default) and
-// carry the heavy-lifting for scoring and game state management.
+// TODO: write better description
+/// <summary>
+/// HexTiles are the core game piece. They have 4 states (empty, grown, burned, and default) and
+/// carry the heavy-lifting for scoring and game state management.
+/// </summary>
 public class HexTile : MonoBehaviour
 {
-    // Tunable variables
+    // CONSTANTS
     const float MAX_SECONDS_LEFT = 15;
 
-    HexGrid grid;
-    GameManager gameManager;
-
-    #nullable enable
-    HexTile?[] adjacentTiles = new HexTile?[6];     // Reference to 6 adjacent tiles clockwise from 1:00 position. Null is allowed
-    #nullable disable
-    VertexNode[] adjacentNodes;                     // Reference to 3 adjacent nodes clockwise from 12:00 position. Null is NOT allowed
-    Vector2Int cellPosition;
-
-    enum ETileState {
-        Empty,
-        Grown,
-        Burned,
-        Default
-    }
-    ETileState tileState;
-
-    // Every possible permutation of vertices. Odd indices are x-mirrors of the preceding even indices
-    static readonly EVertexType[][] possibleVertexPermutations = new EVertexType[][]
-    {
-        new EVertexType[] {EVertexType.Sun, EVertexType.Nutrients, EVertexType.Water},
-        new EVertexType[] {EVertexType.Sun, EVertexType.Water, EVertexType.Nutrients},
-        new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
-        new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
-        new EVertexType[] {EVertexType.Nutrients, EVertexType.Water, EVertexType.Sun},
-        new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun},
-    };
-    int? vertexPermutationIndex;
-
+    // RESOURCES
     public Sprite spriteEmpty, spriteGrown, spriteBurned, spriteDefault;
+
+    // FIELDS
+    GameManager gameManager;
+    HexGrid grid;
+
     SpriteRenderer spriteRenderer;
     SpriteRenderer vertexRenderer;
     TextMeshProUGUI timerText;
 
-    float secondsLeft;
+    Vector2Int cellPos;
+    bool isPlaced = false;
+    ETileState tileState;
+
+    // TODO: encapsulate timer as separate component
     bool timerActive;
+    float secondsLeft;
 
-    bool isStartTile = false;
+    int? vertexPermutationIndex;
 
+    VertexNode[] adjacentNodes;                     // Reference to 3 adjacent nodes clockwise from 12:00 position
+
+    #nullable enable
+    HexTile?[] adjacentTiles = new HexTile?[6];     // Reference to 6 adjacent tiles clockwise from 1:00 position
+    #nullable disable
+
+    // ================================================================================================================================
+    // TILE METHODS
 
     void Start()
     {
-        secondsLeft = -1;
-        timerActive = false;
-        tileState = ETileState.Empty;
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = spriteEmpty;
 
@@ -66,7 +55,7 @@ public class HexTile : MonoBehaviour
         timerText = gameObject.GetComponentInChildren<TextMeshProUGUI>();
         timerText.text = "";
 
-        if(isStartTile) Place(0);
+        if(isPlaced) Place(0);
     }
 
     void Update()
@@ -92,18 +81,34 @@ public class HexTile : MonoBehaviour
         else timerText.text = "";
     }
 
-    public void setGrid(HexGrid _grid)
+    public void Initialize(GameManager _gameManager, HexGrid _grid, Vector2Int _cellPos, bool _isPlaced)
+    {
+        gameManager = _gameManager;
+        grid = _grid;
+
+        cellPos = _cellPos;
+        isPlaced = _isPlaced;
+
+        secondsLeft = -1;
+        timerActive = false;
+        tileState = ETileState.Empty;
+
+        adjacentTiles = grid.GetAdjacentTilesToTile(cellPos);
+        adjacentNodes = grid.GetAdjacentNodes(cellPos);
+    }
+
+    public void SetGrid(HexGrid _grid)
     {
         grid = _grid;
     }
 
-    public void setCellPosition(Vector2Int _cellPosition)
+    public void SetCellPosition(Vector2Int _cellPosition)
     {
-        cellPosition = _cellPosition;
+        cellPos = _cellPosition;
     }
 
     // Set my adjacent nodes and let them know I exist
-    public void setAdjacentNodes(VertexNode[] _adjacentNodes)
+    public void SetAdjacentNodes(VertexNode[] _adjacentNodes)
     {
         adjacentNodes = _adjacentNodes;
         for (int i = 0; i < _adjacentNodes.Length; i++)
@@ -112,8 +117,9 @@ public class HexTile : MonoBehaviour
         }
     }
 
+    #nullable enable
     // Set my adjacent tiles and let them know I exist
-    public void setAdjacentTiles(HexTile?[] _adjacentTiles)
+    public void SetAdjacentTiles(HexTile?[] _adjacentTiles)
     {
         adjacentTiles = _adjacentTiles;
         for (int i = 0; i < _adjacentTiles.Length; i++)
@@ -125,6 +131,7 @@ public class HexTile : MonoBehaviour
             }
         }
     }
+    #nullable disable
 
     public void setAdjacentTile(int index, HexTile tile)
     {
@@ -155,7 +162,7 @@ public class HexTile : MonoBehaviour
 
         foreach (VertexNode node in adjacentNodes)
         {
-            node.AddTile();
+            node.CheckMatch();
         }
 
         // Rotate/mirror the vertices based on permutation
@@ -177,7 +184,7 @@ public class HexTile : MonoBehaviour
     {
         tileState = ETileState.Grown;
         spriteRenderer.sprite = spriteGrown;
-        grid.PopulateAdjacentTiles(cellPosition);
+        grid.PopulateAdjacentTiles(cellPos);
     }
 
     // When the time is up, destroy adjacent trees and any spaces that might 
@@ -250,14 +257,42 @@ public class HexTile : MonoBehaviour
         return vertexPermutationIndex != null;
     }
 
-    public void setGameManager(GameManager _gameManager)
+    public void SetGameManager(GameManager _gameManager)
     {
         gameManager = _gameManager;
     }
 
     public void MarkStartTile()
     {
-        isStartTile = true;
+        isPlaced = true;
     }
 
+    // ================================================================================================================================
+    // ENUMS AND HELPERS
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    enum ETileState {
+        Empty,
+        Grown,
+        Burned,
+        Default
+    }
+
+    /// <summary>
+    /// Every possible permutation of vertices. Odd indices are x-mirrors of the preceding even indices.
+    /// Advancing pairs are rotated by 120 degrees clockwise
+    /// </summary>
+    static readonly EVertexType[][] possibleVertexPermutations = new EVertexType[][]
+    {
+        new EVertexType[] {EVertexType.Sun, EVertexType.Nutrients, EVertexType.Water},
+        new EVertexType[] {EVertexType.Sun, EVertexType.Water, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Water, EVertexType.Sun, EVertexType.Nutrients},
+        new EVertexType[] {EVertexType.Nutrients, EVertexType.Sun, EVertexType.Water},
+        new EVertexType[] {EVertexType.Nutrients, EVertexType.Water, EVertexType.Sun},
+        new EVertexType[] {EVertexType.Water, EVertexType.Nutrients, EVertexType.Sun},
+    };
+
+    // ================================================================================================================================
 }

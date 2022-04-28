@@ -3,7 +3,10 @@ guid: fd155d50636e4499481fd104e7f8db35
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - pfHexGrid: {fileID: 6227895149458596374, guid: 6470b31bf63e1994a909120b16a34785, type: 3}
+  - upcomingTileDisplay: {instanceID: 0}
+  - scoreText: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
