@@ -93,8 +93,8 @@ public class HexTile : MonoBehaviour
         timerActive = false;
         tileState = ETileState.Empty;
 
-        adjacentTiles = grid.GetAdjacentTilesToTile(cellPos);
-        adjacentNodes = grid.GetAdjacentNodes(cellPos);
+        SetAdjacentTiles(grid.GetAdjacentTilesToTile(cellPos));
+        SetAdjacentNodes(grid.GetAdjacentNodes(cellPos));
     }
 
     public void SetGrid(HexGrid _grid)
@@ -108,7 +108,7 @@ public class HexTile : MonoBehaviour
     }
 
     // Set my adjacent nodes and let them know I exist
-    public void SetAdjacentNodes(VertexNode[] _adjacentNodes)
+    void SetAdjacentNodes(VertexNode[] _adjacentNodes)
     {
         adjacentNodes = _adjacentNodes;
         for (int i = 0; i < _adjacentNodes.Length; i++)
@@ -119,7 +119,7 @@ public class HexTile : MonoBehaviour
 
     #nullable enable
     // Set my adjacent tiles and let them know I exist
-    public void SetAdjacentTiles(HexTile?[] _adjacentTiles)
+    void SetAdjacentTiles(HexTile?[] _adjacentTiles)
     {
         adjacentTiles = _adjacentTiles;
         for (int i = 0; i < _adjacentTiles.Length; i++)
