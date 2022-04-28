@@ -60,14 +60,11 @@ public class VertexNode : MonoBehaviour
     // is allowed and grow if able
     public void CheckMatch()
     {
-        Debug.Log("Checking Match!");
         // Three different vertices must meet to be a valid growth location
         if (adjacentTiles[0] != null && adjacentTiles[1] != null && adjacentTiles[2] != null)
         {
-            Debug.Log("Null Check Passed!");
             if (adjacentTiles[0].hasVertices() && adjacentTiles[1].hasVertices() && adjacentTiles[2].hasVertices())
             {
-                Debug.Log("Vertices Check Passed!");
                 EVertexType tile0Vert = adjacentTiles[0].GetVertex(0);
                 EVertexType tile1Vert = adjacentTiles[1].GetVertex(1);
                 EVertexType tile2Vert = adjacentTiles[2].GetVertex(2);
